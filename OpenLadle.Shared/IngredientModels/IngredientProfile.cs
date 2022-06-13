@@ -6,6 +6,10 @@ public class IngredientProfile : Profile
 {
     public IngredientProfile()
     {
-        CreateMap<IngredientCreateViewModel, Ingredient>();
+        CreateMap<IngredientCreateRequest, Ingredient>();
+
+        CreateMap<IngredientUpdateRequest, Ingredient>();
+
+        CreateMap<Ingredient, IngredientViewModel>();
     }
 }

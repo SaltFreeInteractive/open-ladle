@@ -1,4 +1,5 @@
-﻿using OpenLadle.Core.Services;
+﻿using OpenLadle.Core.Abstractions;
+using OpenLadle.Core.Services;
 using OpenLadle.Shared.UserModels;
 using System.Reflection;
 
@@ -9,7 +10,7 @@ public static class OpenLadleServiceCollectionExtensions
     public static IServiceCollection AddOpenLadle(this IServiceCollection services)
     {
         services.AddAutoMapper(Assembly.GetAssembly(typeof(ApplicationUser)));
-        services.AddScoped<IngredientService>();
+        services.AddScoped<IIngredientService, IngredientService>();
 
         return services;
     }
