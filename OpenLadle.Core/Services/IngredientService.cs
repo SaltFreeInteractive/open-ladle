@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OpenLadle.Core.Abstractions;
 using OpenLadle.Core.Exceptions;
 using OpenLadle.Data;
@@ -10,37 +9,33 @@ namespace OpenLadle.Core.Services;
 public class IngredientService : IIngredientService
 {
     private readonly ApplicationDbContext applicationDbContext;
-    private readonly IMapper mapper;
 
-    public IngredientService(ApplicationDbContext applicationDbContext, IMapper mapper)
+    public IngredientService(ApplicationDbContext applicationDbContext)
     {
         this.applicationDbContext = applicationDbContext;
-        this.mapper = mapper;
     }
 
-    public async Task<IngredientViewModel> Create(IngredientCreateRequest ingredientCreateRequest)
+    public async Task<Ingredient> Create(Ingredient ingredient)
     {
-        if (await IngredientWithNameExists(ingredientCreateRequest.Name))
+        if (await IngredientWithNameExists(ingredient.Name))
         {
             throw new ResourceAlreadyExistsException("An ingredient by this name already exists.");
         }
 
-        var newIngredient = mapper.Map<Ingredient>(ingredientCreateRequest);
-
-        await applicationDbContext.Ingredients.AddAsync(newIngredient);
+        await applicationDbContext.Ingredients.AddAsync(ingredient);
         await applicationDbContext.SaveChangesAsync();
 
-        return mapper.Map<IngredientViewModel>(newIngredient);
+        return ingredient;
     }
 
-    public async Task<IngredientViewModel?> Retrieve(Guid id)
+    public async Task<Ingredient?> Retrieve(Guid id)
     {
-        return mapper.Map<IngredientViewModel>(await applicationDbContext.Ingredients.FindAsync(id));
+        return await applicationDbContext.Ingredients.FindAsync(id);
     }
 
-    public async Task<IngredientViewModel> Update(Guid id, IngredientUpdateRequest ingredientUpdateRequest)
+    public async Task<Ingredient> Update(Guid id, Ingredient ingredient)
     {
-        if (await IngredientWithNameExists(ingredientUpdateRequest.Name))
+        if (await IngredientWithNameExists(ingredient.Name))
         {
             throw new ResourceAlreadyExistsException("An ingredient by this name already exists.");
         }
@@ -52,11 +47,11 @@ public class IngredientService : IIngredientService
             throw new ResourceDoesNotExistException("An ingredient with this Id was not found.");
         }
 
-        mapper.Map(ingredientUpdateRequest, result);
+        result.Name = ingredient.Name;
 
         await applicationDbContext.SaveChangesAsync();
 
-        return mapper.Map<IngredientViewModel>(result);
+        return result;
     }
 
     public async Task Delete(Guid id)

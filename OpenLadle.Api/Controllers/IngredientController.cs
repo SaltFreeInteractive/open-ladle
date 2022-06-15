@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using OpenLadle.Api.Models;
 using OpenLadle.Core.Abstractions;
 using OpenLadle.Core.Exceptions;
 using OpenLadle.Shared.IngredientModels;
@@ -11,20 +13,24 @@ namespace OpenLadle.Api.Controllers;
 public class IngredientController : ControllerBase
 {
     private readonly ILogger logger;
+    private readonly IMapper mapper;
     private readonly IIngredientService ingredientService;
 
-    public IngredientController(ILogger logger, IIngredientService ingredientService)
+    public IngredientController(ILogger logger, IMapper mapper, IIngredientService ingredientService)
     {
         this.logger = logger;
+        this.mapper = mapper;
         this.ingredientService = ingredientService;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] IngredientCreateRequest ingredientCreateViewModel)
+    public async Task<IActionResult> Create([FromBody] CreateIngredientRequest createIngredientRequest)
     {
         try
         {
-            return Ok(await ingredientService.Create(ingredientCreateViewModel));
+            var ingredient = await ingredientService.Create(mapper.Map<Ingredient>(createIngredientRequest));
+
+            return Ok(mapper.Map<CreateIngredientResponse>(ingredient));
         }
         catch(ResourceAlreadyExistsException exception)
         {
@@ -59,11 +65,13 @@ public class IngredientController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] IngredientUpdateRequest ingredientUpdateRequest)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateIngredientRequest updateIngredientRequest)
     {
         try
         {
-            return Ok(await ingredientService.Update(id, ingredientUpdateRequest));
+            var ingredient = await ingredientService.Update(id, mapper.Map<Ingredient>(updateIngredientRequest));
+
+            return Ok(mapper.Map<UpdateIngredientResponse>(ingredient));
         }
         catch (ResourceDoesNotExistException)
         {

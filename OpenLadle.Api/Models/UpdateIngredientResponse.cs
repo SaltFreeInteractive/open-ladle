@@ -1,6 +1,6 @@
-﻿namespace OpenLadle.Shared.IngredientModels;
+﻿namespace OpenLadle.Api.Models;
 
-public class IngredientViewModel
+public class UpdateIngredientResponse
 {
     public Guid Id { get; set; }
 

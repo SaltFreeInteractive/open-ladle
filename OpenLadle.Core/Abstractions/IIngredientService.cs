@@ -4,9 +4,9 @@ namespace OpenLadle.Core.Abstractions
 {
     public interface IIngredientService
     {
-        Task<IngredientViewModel> Create(IngredientCreateRequest ingredientCreateRequest);
+        Task<Ingredient> Create(Ingredient ingredient);
         Task Delete(Guid id);
-        Task<IngredientViewModel?> Retrieve(Guid id);
-        Task<IngredientViewModel> Update(Guid id, IngredientUpdateRequest ingredientUpdateRequest);
+        Task<Ingredient?> Retrieve(Guid id);
+        Task<Ingredient> Update(Guid id, Ingredient ingredient);
     }
 }

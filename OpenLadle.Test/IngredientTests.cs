@@ -22,13 +22,7 @@ public class IngredientTests
         testDbContext = new ApplicationDbContext(dbContextOptions);
         await testDbContext.Database.EnsureCreatedAsync();
 
-        var mapperConfiguration = new MapperConfiguration(mapperConfigurationOptions =>
-        {
-            mapperConfigurationOptions.AddProfile<IngredientProfile>();
-        });
-        testMapper = mapperConfiguration.CreateMapper();
-
-        ingredientService = new IngredientService(testDbContext, testMapper);
+        ingredientService = new IngredientService(testDbContext);
     }
 
     [TearDown]
@@ -40,7 +34,7 @@ public class IngredientTests
     [Test]
     public async Task Create_ValidInput_ReturnCreatedResource()
     {
-        var validInput = new IngredientCreateRequest
+        var validInput = new Ingredient
         {
             Name = "Create_ValidInput"
         };
@@ -48,7 +42,7 @@ public class IngredientTests
         var result = await ingredientService.Create(validInput);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result, Is.InstanceOf<IngredientViewModel>());
+        Assert.That(result, Is.InstanceOf<Ingredient>());
         Assert.That(result.Name, Is.EqualTo(validInput.Name));
     }
 
@@ -62,7 +56,7 @@ public class IngredientTests
         await testDbContext.Ingredients.AddAsync(existingIngredient);
         await testDbContext.SaveChangesAsync();
 
-        var inputWithExistingName = new IngredientCreateRequest
+        var inputWithExistingName = new Ingredient
         {
             Name = existingIngredient.Name
         };
@@ -83,7 +77,7 @@ public class IngredientTests
         var result = await ingredientService.Retrieve(existingIngredient.Id);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result, Is.InstanceOf<IngredientViewModel>());
+        Assert.That(result, Is.InstanceOf<Ingredient>());
         Assert.That(result.Name, Is.EqualTo(existingIngredient.Name));
     }
 
@@ -107,7 +101,7 @@ public class IngredientTests
         await testDbContext.Ingredients.AddAsync(existingIngredient);
         await testDbContext.SaveChangesAsync();
 
-        var validInput = new IngredientUpdateRequest
+        var validInput = new Ingredient
         {
             Name = "Changed_Update_ValidIdValidParameters"
         };
@@ -115,7 +109,7 @@ public class IngredientTests
         var result = await ingredientService.Update(existingIngredient.Id, validInput);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result, Is.InstanceOf<IngredientViewModel>());
+        Assert.That(result, Is.InstanceOf<Ingredient>());
         Assert.That(result.Name, Is.EqualTo(validInput.Name));
     }
 
@@ -124,7 +118,7 @@ public class IngredientTests
     {
         var invalidId = Guid.NewGuid();
 
-        var validInput = new IngredientUpdateRequest
+        var validInput = new Ingredient
         {
             Name = "Update_InvalidIdValidInput"
         };
@@ -147,7 +141,7 @@ public class IngredientTests
         await testDbContext.Ingredients.AddAsync(secondExistingIngredient);
         await testDbContext.SaveChangesAsync();
 
-        var inputWithExistingName = new IngredientUpdateRequest
+        var inputWithExistingName = new Ingredient
         {
             Name = secondExistingIngredient.Name
         };

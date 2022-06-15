@@ -9,7 +9,6 @@ public static class OpenLadleServiceCollectionExtensions
 {
     public static IServiceCollection AddOpenLadle(this IServiceCollection services)
     {
-        services.AddAutoMapper(Assembly.GetAssembly(typeof(ApplicationUser)));
         services.AddScoped<IIngredientService, IngredientService>();
 
         return services;

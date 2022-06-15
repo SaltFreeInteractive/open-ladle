@@ -22,6 +22,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(dbContextOptions =>
         });
 });
 
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
 builder.Services.AddOpenLadle();
 
 builder.Services.AddControllers();
