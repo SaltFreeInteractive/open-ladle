@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using OpenLadle.Data;
 using Serilog;
 using System.Reflection;
 
@@ -11,20 +10,12 @@ builder.Host.UseSerilog((hostingContext, loggerContext) =>
         .WriteTo.Console();
 });
 
-builder.Services.AddDbContext<ApplicationDbContext>(dbContextOptions =>
-{
-    dbContextOptions.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
-        mySqlBuilder =>
-        {
-            mySqlBuilder.MigrationsAssembly(Assembly.GetAssembly(typeof(ApplicationDbContext)).GetName().Name);
-        });
-});
-
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-builder.Services.AddOpenLadle();
+builder.Services.AddOpenLadle(openLadleOptions =>
+{
+    openLadleOptions.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+});
 
 builder.Services.AddControllers();
 

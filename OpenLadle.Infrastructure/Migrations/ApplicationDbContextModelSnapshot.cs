@@ -3,11 +3,11 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using OpenLadle.Data;
+using OpenLadle.Infrastructure;
 
 #nullable disable
 
-namespace OpenLadle.Data.Migrations
+namespace OpenLadle.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -147,7 +147,7 @@ namespace OpenLadle.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("OpenLadle.Shared.IngredientModels.Ingredient", b =>
+            modelBuilder.Entity("OpenLadle.Core.Ingredient.IngredientEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -165,7 +165,7 @@ namespace OpenLadle.Data.Migrations
                     b.ToTable("Ingredients");
                 });
 
-            modelBuilder.Entity("OpenLadle.Shared.UserModels.ApplicationUser", b =>
+            modelBuilder.Entity("OpenLadle.Core.User.UserEntity", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
@@ -240,7 +240,7 @@ namespace OpenLadle.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("OpenLadle.Shared.UserModels.ApplicationUser", null)
+                    b.HasOne("OpenLadle.Core.User.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -249,7 +249,7 @@ namespace OpenLadle.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("OpenLadle.Shared.UserModels.ApplicationUser", null)
+                    b.HasOne("OpenLadle.Core.User.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -264,7 +264,7 @@ namespace OpenLadle.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OpenLadle.Shared.UserModels.ApplicationUser", null)
+                    b.HasOne("OpenLadle.Core.User.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -273,7 +273,7 @@ namespace OpenLadle.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("OpenLadle.Shared.UserModels.ApplicationUser", null)
+                    b.HasOne("OpenLadle.Core.User.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

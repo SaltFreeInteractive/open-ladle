@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using OpenLadle.Api.Models;
-using OpenLadle.Core.Abstractions;
+using OpenLadle.Api.Models.Ingredient;
 using OpenLadle.Core.Exceptions;
-using OpenLadle.Shared.IngredientModels;
+using OpenLadle.Core.Ingredient;
 using ILogger = Serilog.ILogger;
 
 namespace OpenLadle.Api.Controllers;
@@ -28,7 +27,12 @@ public class IngredientController : ControllerBase
     {
         try
         {
-            var ingredient = await ingredientService.Create(mapper.Map<Ingredient>(createIngredientRequest));
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var ingredient = await ingredientService.Create(mapper.Map<IngredientEntity>(createIngredientRequest));
 
             return Ok(mapper.Map<CreateIngredientResponse>(ingredient));
         }
@@ -69,7 +73,7 @@ public class IngredientController : ControllerBase
     {
         try
         {
-            var ingredient = await ingredientService.Update(id, mapper.Map<Ingredient>(updateIngredientRequest));
+            var ingredient = await ingredientService.Update(id, mapper.Map<IngredientEntity>(updateIngredientRequest));
 
             return Ok(mapper.Map<UpdateIngredientResponse>(ingredient));
         }

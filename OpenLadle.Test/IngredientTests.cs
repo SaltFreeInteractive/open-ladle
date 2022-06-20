@@ -1,16 +1,15 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using OpenLadle.Core.Abstractions;
 using OpenLadle.Core.Exceptions;
-using OpenLadle.Data;
-using OpenLadle.Shared.IngredientModels;
+using OpenLadle.Core.Ingredient;
+using OpenLadle.Infrastructure;
+using OpenLadle.Infrastructure.Repositories;
 
 namespace OpenLadle.Test;
 
 public class IngredientTests
 {
     private ApplicationDbContext testDbContext = null!;
-    private IMapper testMapper = null!;
+    private IIngredientRepository ingredientRepository = null!;
     private IIngredientService ingredientService = null!;
 
     [SetUp]
@@ -22,7 +21,9 @@ public class IngredientTests
         testDbContext = new ApplicationDbContext(dbContextOptions);
         await testDbContext.Database.EnsureCreatedAsync();
 
-        ingredientService = new IngredientService(testDbContext);
+        ingredientRepository = new IngredientRepository(testDbContext);
+
+        ingredientService = new IngredientService(ingredientRepository);
     }
 
     [TearDown]
@@ -34,7 +35,7 @@ public class IngredientTests
     [Test]
     public async Task Create_ValidInput_ReturnCreatedResource()
     {
-        var validInput = new Ingredient
+        var validInput = new IngredientEntity
         {
             Name = "Create_ValidInput"
         };
@@ -42,21 +43,20 @@ public class IngredientTests
         var result = await ingredientService.Create(validInput);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result, Is.InstanceOf<Ingredient>());
+        Assert.That(result, Is.InstanceOf<IngredientEntity>());
         Assert.That(result.Name, Is.EqualTo(validInput.Name));
     }
 
     [Test]
     public async Task Create_InputWithExistingName_ThrowException()
     {
-        var existingIngredient = new Ingredient
+        var existingIngredient = new IngredientEntity
         {
             Name = "Create_InputWithExistingName"
         };
-        await testDbContext.Ingredients.AddAsync(existingIngredient);
-        await testDbContext.SaveChangesAsync();
+        await ingredientRepository.AddAsync(existingIngredient);
 
-        var inputWithExistingName = new Ingredient
+        var inputWithExistingName = new IngredientEntity
         {
             Name = existingIngredient.Name
         };
@@ -67,17 +67,16 @@ public class IngredientTests
     [Test]
     public async Task Retrieve_ValidId_ReturnsResource()
     {
-        var existingIngredient = new Ingredient
+        var existingIngredient = new IngredientEntity
         {
             Name = "Retrieve_ValidId"
         };
-        await testDbContext.Ingredients.AddAsync(existingIngredient);
-        await testDbContext.SaveChangesAsync();
+        await ingredientRepository.AddAsync(existingIngredient);
 
         var result = await ingredientService.Retrieve(existingIngredient.Id);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result, Is.InstanceOf<Ingredient>());
+        Assert.That(result, Is.InstanceOf<IngredientEntity>());
         Assert.That(result.Name, Is.EqualTo(existingIngredient.Name));
     }
 
@@ -94,14 +93,13 @@ public class IngredientTests
     [Test]
     public async Task Update_ValidIdValidInput_ReturnsUpdatedResource()
     {
-        var existingIngredient = new Ingredient
+        var existingIngredient = new IngredientEntity
         {
             Name = "Update_ValidIdValidParameters"
         };
-        await testDbContext.Ingredients.AddAsync(existingIngredient);
-        await testDbContext.SaveChangesAsync();
+        await ingredientRepository.AddAsync(existingIngredient);
 
-        var validInput = new Ingredient
+        var validInput = new IngredientEntity
         {
             Name = "Changed_Update_ValidIdValidParameters"
         };
@@ -109,7 +107,7 @@ public class IngredientTests
         var result = await ingredientService.Update(existingIngredient.Id, validInput);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result, Is.InstanceOf<Ingredient>());
+        Assert.That(result, Is.InstanceOf<IngredientEntity>());
         Assert.That(result.Name, Is.EqualTo(validInput.Name));
     }
 
@@ -118,7 +116,7 @@ public class IngredientTests
     {
         var invalidId = Guid.NewGuid();
 
-        var validInput = new Ingredient
+        var validInput = new IngredientEntity
         {
             Name = "Update_InvalidIdValidInput"
         };
@@ -129,19 +127,18 @@ public class IngredientTests
     [Test]
     public async Task Update_ValidIdInputWithExistingName_ThrowsException()
     {
-        var firstExistingIngredient = new Ingredient
+        var firstExistingIngredient = new IngredientEntity
         {
             Name = "First_Update_ValidIdInputWithExistingName"
         };
-        await testDbContext.Ingredients.AddAsync(firstExistingIngredient);
-        var secondExistingIngredient = new Ingredient
+        await ingredientRepository.AddAsync(firstExistingIngredient);
+        var secondExistingIngredient = new IngredientEntity
         {
             Name = "Second_Update_ValidIdInputWithExistingName"
         };
-        await testDbContext.Ingredients.AddAsync(secondExistingIngredient);
-        await testDbContext.SaveChangesAsync();
+        await ingredientRepository.AddAsync(secondExistingIngredient);
 
-        var inputWithExistingName = new Ingredient
+        var inputWithExistingName = new IngredientEntity
         {
             Name = secondExistingIngredient.Name
         };
@@ -152,16 +149,15 @@ public class IngredientTests
     [Test]
     public async Task Delete_ValidId_ReturnsNothing()
     {
-        var existingIngredient = new Ingredient
+        var existingIngredient = new IngredientEntity
         {
             Name = "Delete_ValidId"
         };
-        await testDbContext.Ingredients.AddAsync(existingIngredient);
-        await testDbContext.SaveChangesAsync();
+        await ingredientRepository.AddAsync(existingIngredient);
 
         await ingredientService.Delete(existingIngredient.Id);
 
-        var result = await testDbContext.Ingredients.FindAsync(existingIngredient.Id);
+        var result = await ingredientRepository.GetByIdAsync(existingIngredient.Id);
 
         Assert.That(result, Is.Null);
     }

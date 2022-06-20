@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace OpenLadle.Api.Models;
+namespace OpenLadle.Api.Models.Ingredient;
 
-public class UpdateIngredientRequest
+public class CreateIngredientRequest
 {
     [Required]
     public string Name { get; set; } = null!;
