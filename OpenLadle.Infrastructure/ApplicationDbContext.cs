@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using OpenLadle.Shared.IngredientModels;
-using OpenLadle.Shared.UserModels;
+using OpenLadle.Core.Ingredient;
+using OpenLadle.Core.User;
 
-namespace OpenLadle.Data;
+namespace OpenLadle.Infrastructure;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+public class ApplicationDbContext : IdentityDbContext<UserEntity>
 {
-    public DbSet<Ingredient> Ingredients { get; set; } = null!;
+    public DbSet<IngredientEntity> Ingredients { get; set; } = null!;
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -18,7 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<Ingredient>(entity =>
+        builder.Entity<IngredientEntity >(entity =>
         {
             entity.HasIndex(ingredient => ingredient.Name)
                 .IsUnique();

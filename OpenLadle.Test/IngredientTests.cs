@@ -1,16 +1,16 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using OpenLadle.Core.Exceptions;
-using OpenLadle.Data;
-using OpenLadle.Shared.IngredientModels;
+using OpenLadle.Core.Ingredient;
+using OpenLadle.Infrastructure;
+using OpenLadle.Infrastructure.Repositories;
 
 namespace OpenLadle.Test;
 
 public class IngredientTests
 {
     private ApplicationDbContext testDbContext = null!;
-    private IMapper testMapper = null!;
-    private IngredientService ingredientService = null!;
+    private IIngredientRepository ingredientRepository = null!;
+    private IIngredientService ingredientService = null!;
 
     [SetUp]
     public async Task Setup()
@@ -21,13 +21,9 @@ public class IngredientTests
         testDbContext = new ApplicationDbContext(dbContextOptions);
         await testDbContext.Database.EnsureCreatedAsync();
 
-        var mapperConfiguration = new MapperConfiguration(mapperConfigurationOptions =>
-        {
-            mapperConfigurationOptions.AddProfile<IngredientProfile>();
-        });
-        testMapper = mapperConfiguration.CreateMapper();
+        ingredientRepository = new IngredientRepository(testDbContext);
 
-        ingredientService = new IngredientService(testDbContext, testMapper);
+        ingredientService = new IngredientService(ingredientRepository);
     }
 
     [TearDown]
@@ -39,28 +35,28 @@ public class IngredientTests
     [Test]
     public async Task Create_ValidInput_ReturnCreatedResource()
     {
-        var validInput = new IngredientCreateViewModel
+        var validInput = new IngredientEntity
         {
-            Name = "Apple"
+            Name = "Create_ValidInput"
         };
 
         var result = await ingredientService.Create(validInput);
 
         Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.InstanceOf<IngredientEntity>());
         Assert.That(result.Name, Is.EqualTo(validInput.Name));
     }
 
     [Test]
     public async Task Create_InputWithExistingName_ThrowException()
     {
-        var existingIngredient = new Ingredient
+        var existingIngredient = new IngredientEntity
         {
-            Name = "Carrot"
+            Name = "Create_InputWithExistingName"
         };
-        await testDbContext.Ingredients.AddAsync(existingIngredient);
-        await testDbContext.SaveChangesAsync();
+        await ingredientRepository.AddAsync(existingIngredient);
 
-        var inputWithExistingName = new IngredientCreateViewModel
+        var inputWithExistingName = new IngredientEntity
         {
             Name = existingIngredient.Name
         };
@@ -71,16 +67,16 @@ public class IngredientTests
     [Test]
     public async Task Retrieve_ValidId_ReturnsResource()
     {
-        var existingIngredient = new Ingredient
+        var existingIngredient = new IngredientEntity
         {
-            Name = "Grape"
+            Name = "Retrieve_ValidId"
         };
-        await testDbContext.Ingredients.AddAsync(existingIngredient);
-        await testDbContext.SaveChangesAsync();
+        await ingredientRepository.AddAsync(existingIngredient);
 
         var result = await ingredientService.Retrieve(existingIngredient.Id);
 
         Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.InstanceOf<IngredientEntity>());
         Assert.That(result.Name, Is.EqualTo(existingIngredient.Name));
     }
 
@@ -92,5 +88,85 @@ public class IngredientTests
         var result = await ingredientService.Retrieve(invalidId);
 
         Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public async Task Update_ValidIdValidInput_ReturnsUpdatedResource()
+    {
+        var existingIngredient = new IngredientEntity
+        {
+            Name = "Update_ValidIdValidParameters"
+        };
+        await ingredientRepository.AddAsync(existingIngredient);
+
+        var validInput = new IngredientEntity
+        {
+            Name = "Changed_Update_ValidIdValidParameters"
+        };
+
+        var result = await ingredientService.Update(existingIngredient.Id, validInput);
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.InstanceOf<IngredientEntity>());
+        Assert.That(result.Name, Is.EqualTo(validInput.Name));
+    }
+
+    [Test]
+    public void Update_InvalidIdValidInput_ThrowsException()
+    {
+        var invalidId = Guid.NewGuid();
+
+        var validInput = new IngredientEntity
+        {
+            Name = "Update_InvalidIdValidInput"
+        };
+
+        Assert.ThrowsAsync<ResourceDoesNotExistException>(async () => await ingredientService.Update(invalidId, validInput));
+    }
+
+    [Test]
+    public async Task Update_ValidIdInputWithExistingName_ThrowsException()
+    {
+        var firstExistingIngredient = new IngredientEntity
+        {
+            Name = "First_Update_ValidIdInputWithExistingName"
+        };
+        await ingredientRepository.AddAsync(firstExistingIngredient);
+        var secondExistingIngredient = new IngredientEntity
+        {
+            Name = "Second_Update_ValidIdInputWithExistingName"
+        };
+        await ingredientRepository.AddAsync(secondExistingIngredient);
+
+        var inputWithExistingName = new IngredientEntity
+        {
+            Name = secondExistingIngredient.Name
+        };
+
+        Assert.ThrowsAsync<ResourceAlreadyExistsException>(async () => await ingredientService.Update(firstExistingIngredient.Id, inputWithExistingName));
+    }
+
+    [Test]
+    public async Task Delete_ValidId_ReturnsNothing()
+    {
+        var existingIngredient = new IngredientEntity
+        {
+            Name = "Delete_ValidId"
+        };
+        await ingredientRepository.AddAsync(existingIngredient);
+
+        await ingredientService.Delete(existingIngredient.Id);
+
+        var result = await ingredientRepository.GetByIdAsync(existingIngredient.Id);
+
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void Delete_InvalidId_ThrowsException()
+    {
+        var inlavidId = Guid.NewGuid();
+
+        Assert.ThrowsAsync<ResourceDoesNotExistException>(async () => await ingredientService.Delete(inlavidId));
     }
 }

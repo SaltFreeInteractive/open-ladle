@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OpenLadle.Core\OpenLadle.Core.csproj" />
-    <ProjectReference Include="..\OpenLadle.Data\OpenLadle.Data.csproj" />
+    <ProjectReference Include="..\OpenLadle.Infrastructure\OpenLadle.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
